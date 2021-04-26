@@ -12,12 +12,13 @@ fpsSensitivity = 0.15  # rychlost obnovovani FPS (doba mezi merenim->mensi=rychl
 
 
 def findallcodes(frame):
-    '''Funkce, ktera najde VSECHNY kody ve snimku
+    '''
+    Funkce, ktera najde VSECHNY kody ve snimku
     - kolem prectenych kodu nakresli ctverec(obdelnik)
     - precte kody a jejich obsah zapise nad zamotny QR kod
-    @param frame: nacteny snimek (frame)
-    @return: nactene kody v poli (barcodeDatas)
-    @return: upraveny snimek s vyznacenymi kody a jejich obsahem(frame)
+    :param frame: nacteny snimek (frame)
+    :return: nactene kody v poli (barcodeDatas)
+    :return: upraveny snimek s vyznacenymi kody a jejich obsahem(frame)
     '''
     # nalezne carove a QR kody ve snimku
     barcodes = pyzbar.decode(frame)
