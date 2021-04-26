@@ -6,19 +6,15 @@ import numpy as np          # prace s maticemi a konverze obrazku na matici
 from pyzbar import pyzbar   # knihovna pro cteni QR kodu
 import time
 
-cameraInput = 0     #zmena vstupu snimaciho zarizeni
-wantedCode = 'Ahoj' #hledany kod pri spusteni moznosti2 na radku 107
-fpsSensitivity = 0.15  # rychlost obnovovani FPS (doba mezi merenim->mensi=rychlejsi obnova)
-
 
 def findallcodes(frame):
     '''
-    Funkce, ktera najde VSECHNY kody ve snimku
-    - kolem prectenych kodu nakresli ctverec(obdelnik)
-    - precte kody a jejich obsah zapise nad zamotny QR kod
-    :param frame: nacteny snimek (frame)
-    :return: nactene kody v poli (barcodeDatas)
-    :return: upraveny snimek s vyznacenymi kody a jejich obsahem(frame)
+    Funkce, ktera najde VSECHNY kody ve snimku,
+    kolem prectenych kodu nakresli ctverec(obdelnik),
+    precte kody a jejich obsah zapise nad zamotny QR kod
+    @type frame:  numpy matrix
+    @param frame: nacteny snimek (frame)
+    @return: nactene kody v poli (barcodeDatas), upraveny snimek s vyznacenymi kody a jejich obsahem(frame)
     '''
     # nalezne carove a QR kody ve snimku
     barcodes = pyzbar.decode(frame)
@@ -44,12 +40,16 @@ def findallcodes(frame):
 
 
 def findcode(frame, data):
-    '''Funkce, ktera hleda jeden konkretni kod
-    - nutno vlozit snimek ke zpracovani a hledana data
-    - najde vsechny kody a overi, zda nektery neobsahuje hledana data
-    - hledany kod vyznaci zelene a vypise jeho obsah, zaroven se k jeho stredu vytvori primka vyznacujici odchylku
-    - ostatni kody zustanou jen ohranicene jako nalezene
-    - vraci upraveny snimek (frame) a odchylku od stredu snimku jako pole o dvou prvcich(vektor od stredu snimku)
+    '''
+    Funkce, ktera hleda jeden konkretni kod,
+    najde vsechny kody a overi, zda nektery neobsahuje hledana data,
+    hledany kod vyznaci zelene a vypise jeho obsah, zaroven se k jeho stredu vytvori primka vyznacujici odchylku,
+    ostatni kody zustanou jen ohranicene jako nalezene
+    @type frame: numpy matrix
+    @param frame: nacteny snimek
+    @type data: string
+    @param data: retezec obsahujici hledana data
+    @return: vraci upraveny snimek (frame) a odchylku od stredu snimku jako pole o dvou prvcich(vektor od stredu snimku)
     pokud jsou oba prvky hodnotou string s obsahem 'null', pak nebyl nalezen hledany kod
     '''
     # nalezne carove a QR kody ve snimku
@@ -89,50 +89,57 @@ def findcode(frame, data):
             odchylkaY = centerCodeY - centerFrameY
     return frame, [odchylkaX, odchylkaY]
 
-# spusteni streamu z kamery
-cap = cv2.VideoCapture(cameraInput)
 
-# promenne pro vypocet fps
-frameTime_previous = 0
-fps = 0
-start = time.time()
+if __name__ == '__main__':
+    
+    cameraInput = 0     #zmena vstupu snimaciho zarizeni
+    wantedCode = 'Ahoj' #hledany kod pri spusteni moznosti2
+    fpsSensitivity = 0.15  # rychlost obnovovani FPS (doba mezi merenim->mensi=rychlejsi obnova)
 
-# cyklus pro cteni z kamery a nasledne zpracovani obrazu.
-while (True):
+    # spusteni streamu z kamery
+    cap = cv2.VideoCapture(cameraInput)
 
-    # nacitani jednotlivych snimku ze streamu
-    ret, frame = cap.read()
+    # promenne pro vypocet fps
+    frameTime_previous = 0
+    fps = 0
+    start = time.time()
 
-    frameTime_current = time.time()  # cas nacteni soucasneho snimku
+    # cyklus pro cteni z kamery a nasledne zpracovani obrazu.
+    while (True):
 
-    # ZPRACOVANI SNIMKU
-    frame = frame  # cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)#lze konvertovat do odstinu sedi
+        # nacitani jednotlivych snimku ze streamu
+        ret, frame = cap.read()
 
-    # MOZNOST 1 - nalezeni vsech kodu ve snimku
-    frame, datas = findallcodes(frame)
+        frameTime_current = time.time()  # cas nacteni soucasneho snimku
 
-    # MOZNOST 2 - nalezeni jednoho urciteho kodu
-    #frame, odchylka = findcode(frame,wantedCode)
+        # ZPRACOVANI SNIMKU
+        frame = frame  # cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)#lze konvertovat do odstinu sedi
 
-    #vypocet FPS
-    end = time.time()
-    if ((fpsSensitivity) <= (end - start)):
-        fps = 1 / (frameTime_current - frameTime_previous)
-        start = end
-    # zobrazeni FPS do snimku
-    cv2.putText(frame, str(int(fps)), (7, 70), cv2.FONT_HERSHEY_SIMPLEX, 1, (100, 255, 0))
-    frameTime_previous = frameTime_current
+        # MOZNOST 1 - nalezeni vsech kodu ve snimku
+        frame, datas = findallcodes(frame)
 
-    # Zobrazeni vysledneho snimku v okne
-    cv2.imshow('frame ' + str(int(cap.get(3))) + ' x ' + str(int(cap.get(4))), frame)
+        # MOZNOST 2 - nalezeni jednoho urciteho kodu
+        #frame, odchylka = findcode(frame,wantedCode)
 
-    #podminka, kdy jde ukoncit zobrazovani videa pomoci klavesy 'q'
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
+        #vypocet FPS
+        end = time.time()
+        if ((fpsSensitivity) <= (end - start)):
+            fps = 1 / (frameTime_current - frameTime_previous)
+            start = end
+        # zobrazeni FPS do snimku
+        cv2.putText(frame, str(int(fps)), (7, 70), cv2.FONT_HERSHEY_SIMPLEX, 1, (100, 255, 0))
+        frameTime_previous = frameTime_current
 
-# Pri ukonceni vysilani ukoncit stream a zavrit vsechna okna
-cap.release()
-cv2.destroyAllWindows()
+        # Zobrazeni vysledneho snimku v okne
+        cv2.imshow('frame ' + str(int(cap.get(3))) + ' x ' + str(int(cap.get(4))), frame)
+
+        #podminka, kdy jde ukoncit zobrazovani videa pomoci klavesy 'q'
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
+    # Pri ukonceni vysilani ukoncit stream a zavrit vsechna okna
+    cap.release()
+    cv2.destroyAllWindows()
 
 
 
