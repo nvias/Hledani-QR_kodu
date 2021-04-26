@@ -10,13 +10,15 @@ cameraInput = 0     #zmena vstupu snimaciho zarizeni
 wantedCode = 'Ahoj' #hledany kod pri spusteni moznosti2 na radku 107
 fpsSensitivity = 0.15  # rychlost obnovovani FPS (doba mezi merenim->mensi=rychlejsi obnova)
 
-'''Funkce, ktera najde VSECHNY kody ve snimku
-    - vstupnimi daty je pouze nacteny snimek (frame)
+
+def findallcodes(frame):
+    '''Funkce, ktera najde VSECHNY kody ve snimku
     - kolem prectenych kodu nakresli ctverec(obdelnik)
     - precte kody a jejich obsah zapise nad zamotny QR kod
-    - zaroven nactene kody vrati v poli(barcodeDatas)
-    - vraci upraveny snimek s vyznacenymi kody a jejich obsahem(frame)'''
-def findallcodes(frame):
+    @param frame: nacteny snimek (frame)
+    @return: nactene kody v poli (barcodeDatas)
+    @return: upraveny snimek s vyznacenymi kody a jejich obsahem(frame)
+    '''
     # nalezne carove a QR kody ve snimku
     barcodes = pyzbar.decode(frame)
     # promenna pro nacteni nazvu kodu
@@ -39,14 +41,16 @@ def findallcodes(frame):
     return frame, barcodeDatas
 
 
-'''Funkce, ktera hleda jeden konkretni kod
+
+def findcode(frame, data):
+    '''Funkce, ktera hleda jeden konkretni kod
     - nutno vlozit snimek ke zpracovani a hledana data
     - najde vsechny kody a overi, zda nektery neobsahuje hledana data
     - hledany kod vyznaci zelene a vypise jeho obsah, zaroven se k jeho stredu vytvori primka vyznacujici odchylku
     - ostatni kody zustanou jen ohranicene jako nalezene
     - vraci upraveny snimek (frame) a odchylku od stredu snimku jako pole o dvou prvcich(vektor od stredu snimku)
-    pokud jsou oba prvky hodnotou string s obsahem 'null', pak nebyl nalezen hledany kod'''
-def findcode(frame, data):
+    pokud jsou oba prvky hodnotou string s obsahem 'null', pak nebyl nalezen hledany kod
+    '''
     # nalezne carove a QR kody ve snimku
     barcodes = pyzbar.decode(frame)
     # promenne vektoru odchylky stredu kodu od stredu snimku (stav kdy nebyl nalezen hledany kod)
